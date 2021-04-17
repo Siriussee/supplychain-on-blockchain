@@ -84,25 +84,28 @@ Test burnFrom()
 
 Contract: SupplyChain
 Test onwership function
-    ✓ Testing smart contract function owner()/isOwner()/renounceOwnership()/transferOwnership() that modify contract's owner (544ms)
+  ✓ Testing smart contract function owner()/isOwner()/renounceOwnership()/transferOwnership() that modify contract's owner (600ms)
 Test role-based access control function
-    ✓ Testing smart contract function addFarmer()/renounceFarmer() that adds/removes a farmer to/from supply chain (117ms)
-    ✓ Testing smart contract function addDistributor()/renounceDistributor() that adds/removes a Distributor to/from supply chain (126ms)
-    ✓ Testing smart contract function addConsumer()/renounceConsumer() that adds/removes a Consumer to/from supply chain (113ms)
-    ✓ Testing smart contract function addRetailer()/renounceRetailer() that adds/removes a Retailer to/from supply chain (115ms)
+  ✓ Testing smart contract function addFarmer()/renounceFarmer() that adds/removes a farmer to/from supply chain (125ms)
+  ✓ Testing smart contract function addDistributor()/renounceDistributor() that adds/removes a Distributor to/from supply chain (125ms)
+  ✓ Testing smart contract function addConsumer()/renounceConsumer() that adds/removes a Consumer to/from supply chain (115ms)
+  ✓ Testing smart contract function addRetailer()/renounceRetailer() that adds/removes a Retailer to/from supply chain (125ms)
 Test business process function of supply chain
-    ✓ Testing smart contract function harvestItem() that allows a farmer to harvest coffee (171ms)
-    ✓ Testing smart contract function processItem() that allows a farmer to process coffee (135ms)
-    ✓ Testing smart contract function packItem() that allows a farmer to pack coffee (170ms)
-    ✓ Testing smart contract function sellItem() that allows a farmer to sell coffee (83ms)
-    ✓ Testing smart contract function buyItem() that allows a distributor to buy coffee (174ms)
-    ✓ Testing smart contract function shipItem() that allows a distributor to ship coffee (132ms)
-    ✓ Testing smart contract function receiveItem() that allows a retailer to mark coffee received (158ms)
-    ✓ Testing smart contract function purchaseItem() that allows a consumer to purchase coffee (145ms)
+  ✓ Testing BalanceOf() that query balance (41ms)
+  ✓ Testing buyToken() that top-up balance (119ms)
+Test business process function of supply chain
+  ✓ Testing smart contract function harvestItem() that allows a farmer to harvest coffee (212ms)
+  ✓ Testing smart contract function processItem() that allows a farmer to process coffee (159ms)
+  ✓ Testing smart contract function packItem() that allows a farmer to pack coffee (144ms)
+  ✓ Testing smart contract function sellItem() that allows a farmer to sell coffee (87ms)
+  ✓ Testing smart contract function buyItem() that allows a distributor to buy coffee (211ms)
+  ✓ Testing smart contract function shipItem() that allows a distributor to ship coffee (125ms)
+  ✓ Testing smart contract function receiveItem() that allows a retailer to mark coffee received (249ms)
+  ✓ Testing smart contract function purchaseItem() that allows a consumer to purchase coffee (204ms)
 Test audit fuction
-    ✓ Testing smart contract function fetchItemBufferOne() that allows anyone to fetch item details from blockchain (49ms)
-    ✓ Testing smart contract function fetchItemBufferTwo() that allows anyone to fetch item details from blockchain (56ms)
+  ✓ Testing smart contract function fetchItemBufferOne() that allows anyone to fetch item details from blockchain (61ms)
+  ✓ Testing smart contract function fetchItemBufferTwo() that allows anyone to fetch item details from blockchain (49ms)
 
 
-39 passing (5s)
+41 passing (5s)
 ```
