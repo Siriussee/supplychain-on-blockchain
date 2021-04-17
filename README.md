@@ -49,57 +49,60 @@ Distributor: accounts[2]  0xCe5144391B4aB80668965F2Cc4f2CC102380Ef0A
 Retailer: accounts[3]  0x460c31107DD048e34971E57DA2F99f659Add4f02
 Consumer: accounts[4]  0xD37b7B8C62BE2fdDe8dAa9816483AeBDBd356088
 
+Contract: SupplyChainToken
+SupplyChainToken Deployment
+    ✓ The deployment should be done successfully
+    ✓ The deployed smart contract has the correct name
+    ✓ The deployed smart contract has the correct symbol
+    ✓ The deployed smart contract has the correct total supply
+Test increaseAllowance()
+    ✓ The sender should have the amount of token unchanged (91ms)
+    ✓ The allowance[sender][receiver] should have the amount of token increased (89ms)
+    ✓ The increaseAllowance() should trigger an event. (53ms)
+Test decreaseAllowance()
+    ✓ The sender should have the amount of token unchanged (79ms)
+    ✓ The allowance[sender][receiver] should have the amount of token decreased (89ms)
+    ✓ The decreaseAllowance() should trigger an event. (46ms)
+Test transfer()
+    ✓ The sender should have the amount of token left after calling transfer() (78ms)
+    ✓ The receiver should have the amount of token received after calling transfer() (80ms)
+    ✓ The transfer should trigger an event. (38ms)
+Test transferFrom()
+    ✓ The sender should have the amount of token decreased after calling transferFrom() (72ms)
+    ✓ allowance[sender][receiver] should have the amount of token decreased (102ms)
+    ✓ The receiver should have the amount of token received after calling transferFrom() (70ms)
+    ✓ The transferFrom should trigger two events. (66ms)
+Test burn()
+    ✓ The deployed smart contract has the correct total supply after burn() (83ms)
+    ✓ The account has the correct balance (93ms)
+    ✓ The burn() should trigger an event. (41ms)
+Test burnFrom()
+    ✓ The deployed smart contract has the correct total supply after burn() (102ms)
+    ✓ The account has the correct balance (108ms)
+    ✓ The account has the correct allowance (71ms)
+    ✓ The burnFrom() should trigger 2 events. (62ms)
 
-  Contract: SupplyChainToken
-    MyERC20Token Deployment
-      ✓ The deployment should be done successfully
-      ✓ The deployed smart contract has the correct name (44ms)
-      ✓ The deployed smart contract has the correct symbol (40ms)
-      ✓ The deployed smart contract has the correct total supply
-    Test increaseAllowance()
-      ✓ The sender should have the amount of token unchanged (96ms)
-      ✓ The allowance[sender][receiver] should have the amount of token increased (123ms)
-      ✓ The increaseAllowance() should trigger an event. (70ms)
-    Test decreaseAllowance()
-      ✓ The sender should have the amount of token unchanged (70ms)
-      ✓ The allowance[sender][receiver] should have the amount of token decreased (86ms)
-      ✓ The decreaseAllowance() should trigger an event. (52ms)
-    Test transfer()
-      ✓ The sender should have the amount of token left after calling transfer() (68ms)
-      ✓ The receiver should have the amount of token received after calling transfer() (84ms)
-      ✓ The transfer should trigger an event. (44ms)
-    Test transferFrom()
-      ✓ The sender should have the amount of token decreased after calling transferFrom() (73ms)
-      ✓ allowance[sender][receiver] should have the amount of token decreased (111ms)
-      ✓ The receiver should have the amount of token received after calling transferFrom() (119ms)
-      ✓ The transferFrom should trigger two events. (60ms)
-    Test burn()
-      ✓ The deployed smart contract has the correct total supply after burn() (93ms)
-      ✓ The account has the correct balance (68ms)
-      ✓ The burn() should trigger an event. (44ms)
-      Test burnFrom()
-        ✓ The deployed smart contract has the correct total supply after burn() (80ms)
-        ✓ The account has the correct balance (88ms)
-        ✓ The account has the correct allowance (105ms)
-        ✓ The burnFrom() should trigger 2 events. (47ms)
-
-  Contract: SupplyChain
-    ✓ 0. Testing smart contract function owner()/isOwner()/renounceOwnership()/transferOwnership() that modify contract's owner (528ms)
-    ✓ 1. Testing smart contract function addFarmer()/renounceFarmer() that adds/removes a farmer to/from supply chain (156ms)
-    ✓ 2. Testing smart contract function addDistributor()/renounceDistributor() that adds/removes a Distributor to/from supply chain (132ms)
-    ✓ 3. Testing smart contract function addConsumer()/renounceConsumer() that adds/removes a Consumer to/from supply chain (111ms)
-    ✓ 4. Testing smart contract function addRetailer()/renounceRetailer() that adds/removes a Retailer to/from supply chain (122ms)
-    ✓ 5. Testing smart contract function harvestItem() that allows a farmer to harvest coffee (160ms)
-    ✓ 6. Testing smart contract function processItem() that allows a farmer to process coffee (137ms)
-    ✓ 7. Testing smart contract function packItem() that allows a farmer to pack coffee (175ms)
-    ✓ 8. Testing smart contract function sellItem() that allows a farmer to sell coffee (99ms)
-    ✓ 9. Testing smart contract function buyItem() that allows a distributor to buy coffee (185ms)
-    ✓ 10. Testing smart contract function shipItem() that allows a distributor to ship coffee (129ms)
-    ✓ 11. Testing smart contract function receiveItem() that allows a retailer to mark coffee received (136ms)
-    ✓ 12. Testing smart contract function purchaseItem() that allows a consumer to purchase coffee (139ms)
-    ✓ 13. Testing smart contract function fetchItemBufferOne() that allows anyone to fetch item details from blockchain (51ms)
-    ✓ 14. Testing smart contract function fetchItemBufferTwo() that allows anyone to fetch item details from blockchain (52ms)
+Contract: SupplyChain
+Test onwership function
+    ✓ Testing smart contract function owner()/isOwner()/renounceOwnership()/transferOwnership() that modify contract's owner (544ms)
+Test role-based access control function
+    ✓ Testing smart contract function addFarmer()/renounceFarmer() that adds/removes a farmer to/from supply chain (117ms)
+    ✓ Testing smart contract function addDistributor()/renounceDistributor() that adds/removes a Distributor to/from supply chain (126ms)
+    ✓ Testing smart contract function addConsumer()/renounceConsumer() that adds/removes a Consumer to/from supply chain (113ms)
+    ✓ Testing smart contract function addRetailer()/renounceRetailer() that adds/removes a Retailer to/from supply chain (115ms)
+Test business process function of supply chain
+    ✓ Testing smart contract function harvestItem() that allows a farmer to harvest coffee (171ms)
+    ✓ Testing smart contract function processItem() that allows a farmer to process coffee (135ms)
+    ✓ Testing smart contract function packItem() that allows a farmer to pack coffee (170ms)
+    ✓ Testing smart contract function sellItem() that allows a farmer to sell coffee (83ms)
+    ✓ Testing smart contract function buyItem() that allows a distributor to buy coffee (174ms)
+    ✓ Testing smart contract function shipItem() that allows a distributor to ship coffee (132ms)
+    ✓ Testing smart contract function receiveItem() that allows a retailer to mark coffee received (158ms)
+    ✓ Testing smart contract function purchaseItem() that allows a consumer to purchase coffee (145ms)
+Test audit fuction
+    ✓ Testing smart contract function fetchItemBufferOne() that allows anyone to fetch item details from blockchain (49ms)
+    ✓ Testing smart contract function fetchItemBufferTwo() that allows anyone to fetch item details from blockchain (56ms)
 
 
-  39 passing (5s)
+39 passing (5s)
 ```

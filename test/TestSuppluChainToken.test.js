@@ -23,7 +23,7 @@ contract("SupplyChainToken",(accounts)=>{
         transferReceipt = await myErc20.transfer(sender, transferToSender, {from: deployer});
     });
 
-    describe('MyERC20Token Deployment', async()=>{
+    describe('SupplyChainToken Deployment', async()=>{
         it('The deployment should be done successfully',async() =>{
             const address = myErc20.address
             assert.notEqual(address,0x0)
@@ -204,52 +204,50 @@ contract("SupplyChainToken",(accounts)=>{
                     && ev.value.toString() === sendTokenAmountWei.toString();
             });
         });
-
-
-        describe('Test burnFrom()', async()=>{
-            before(async () => {
-                let sendTokenAmountWeiThreeTimes = web3.utils.toWei('5');
-                await myErc20.increaseAllowance(receiver, sendTokenAmountWeiThreeTimes, {from: sender});
-            });
-
-            it('The deployed smart contract has the correct total supply after burn()', async()=>{
-                let totalSupplyBefore = await myErc20.totalSupply();
-                await myErc20.burnFrom(sender, sendTokenAmountWei, {from: receiver});
-                let totalSupplyAfter = await myErc20.totalSupply();
-                assert.equal(sendTokenAmountWei, totalSupplyBefore.sub(totalSupplyAfter));
-            });
-
-            it('The account has the correct balance', async()=>{
-                let tokenInSenderBefore = await myErc20.balanceOf(sender);
-                await myErc20.burnFrom(sender, sendTokenAmountWei, {from: receiver});
-                let tokenInSenderAfter = await myErc20.balanceOf(sender);
-                assert.equal(sendTokenAmountWei, tokenInSenderBefore.sub(tokenInSenderAfter));
-            });
-
-            it('The account has the correct allowance', async()=>{
-                let allowanceSender2ReceiverBefore = await myErc20.allowance(sender, receiver);
-                await myErc20.burnFrom(sender, sendTokenAmountWei, {from: receiver});
-                let allowanceSender2ReceiverAfter = await myErc20.allowance(sender, receiver);
-                assert.equal(sendTokenAmountWei, allowanceSender2ReceiverBefore.sub(allowanceSender2ReceiverAfter));
-            });
-
-            it('The burnFrom() should trigger 2 events.', async() => {
-                let burnReceipt = await myErc20.burnFrom(sender, sendTokenAmountWei, {from: receiver});
-                truffleAssert.eventEmitted(burnReceipt, 'Transfer', (ev) => {
-                    return ev.from === sender
-                        && ev.to === "0x0000000000000000000000000000000000000000" //zero address
-                        && ev.value.toString() === sendTokenAmountWei.toString();
-                });
-
-                let allowanceSender2ReceiverAfter = await myErc20.allowance(sender, receiver);
-                truffleAssert.eventEmitted(burnReceipt, 'Approval', (ev) => {
-                    return ev.owner === sender
-                        && ev.spender === receiver
-                        && ev.value.toString() === allowanceSender2ReceiverAfter.toString();
-                });
-            });
-
-        });
     });
 
+
+    describe('Test burnFrom()', async()=>{
+        before(async () => {
+            let sendTokenAmountWeiThreeTimes = web3.utils.toWei('5');
+            await myErc20.increaseAllowance(receiver, sendTokenAmountWeiThreeTimes, {from: sender});
+        });
+
+        it('The deployed smart contract has the correct total supply after burn()', async()=>{
+            let totalSupplyBefore = await myErc20.totalSupply();
+            await myErc20.burnFrom(sender, sendTokenAmountWei, {from: receiver});
+            let totalSupplyAfter = await myErc20.totalSupply();
+            assert.equal(sendTokenAmountWei, totalSupplyBefore.sub(totalSupplyAfter));
+        });
+
+        it('The account has the correct balance', async()=>{
+            let tokenInSenderBefore = await myErc20.balanceOf(sender);
+            await myErc20.burnFrom(sender, sendTokenAmountWei, {from: receiver});
+            let tokenInSenderAfter = await myErc20.balanceOf(sender);
+            assert.equal(sendTokenAmountWei, tokenInSenderBefore.sub(tokenInSenderAfter));
+        });
+
+        it('The account has the correct allowance', async()=>{
+            let allowanceSender2ReceiverBefore = await myErc20.allowance(sender, receiver);
+            await myErc20.burnFrom(sender, sendTokenAmountWei, {from: receiver});
+            let allowanceSender2ReceiverAfter = await myErc20.allowance(sender, receiver);
+            assert.equal(sendTokenAmountWei, allowanceSender2ReceiverBefore.sub(allowanceSender2ReceiverAfter));
+        });
+
+        it('The burnFrom() should trigger 2 events.', async() => {
+            let burnReceipt = await myErc20.burnFrom(sender, sendTokenAmountWei, {from: receiver});
+            truffleAssert.eventEmitted(burnReceipt, 'Transfer', (ev) => {
+                return ev.from === sender
+                    && ev.to === "0x0000000000000000000000000000000000000000" //zero address
+                    && ev.value.toString() === sendTokenAmountWei.toString();
+            });
+
+            let allowanceSender2ReceiverAfter = await myErc20.allowance(sender, receiver);
+            truffleAssert.eventEmitted(burnReceipt, 'Approval', (ev) => {
+                return ev.owner === sender
+                    && ev.spender === receiver
+                    && ev.value.toString() === allowanceSender2ReceiverAfter.toString();
+            });
+        });
+    });
 });
