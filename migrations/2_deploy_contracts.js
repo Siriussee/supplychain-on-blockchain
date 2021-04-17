@@ -11,6 +11,7 @@ module.exports = async(deployer, network, accounts) => {
   let deployDistributorRole = await deployer.deploy(DistributorRole);
   let deployRetailerRole = await deployer.deploy(RetailerRole);
   let deployConsumerRole = await deployer.deploy(ConsumerRole);
-  let deploySupplyChainToken = await deployer.deploy(SupplyChainToken, 'SupplyChainToken', 'SCT', '10000');
+  let deploySupplyChainToken = await deployer.deploy(SupplyChainToken, 'SupplyChainToken', 'SCT', '1000000');
   let deploySupplyChain = await deployer.deploy(SupplyChain, deploySupplyChainToken.address, '1');
+
 };

@@ -29,9 +29,14 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
   // Define a public mapping 'items' that maps the UPC to an Item.
   mapping (uint => Item) items;
 
-  // Define a public mapping 'itemsHistory' that maps the UPC to an array of TxHash,
+  struct History{
+    address owner;
+    uint timestamp;
+  }
+
+  // Define a public mapping 'itemsHistory' that maps the UPC to an array of History,
   // that track its journey through the supply chain -- to be sent from DApp.
-  mapping (uint => string[]) itemsHistory;
+  mapping (uint => History[8]) itemsHistory;
 
   // Define enum 'State' with the following values:
   enum State
@@ -97,7 +102,7 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
     _;
     uint _price = items[_upc].productPrice;
     uint amountToReturn = msg.value - _price;
-    items[_upc].consumerID.transfer(amountToReturn);
+    supplyChainToken.transfer(items[_upc].consumerID, amountToReturn);
   }
 
   // Define a modifier that checks if an item.state of a upc is Harvested
@@ -160,9 +165,10 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
   }
 
   function buyTokens(uint256 _numberOfTokens) public payable {
-    require(msg.value == _numberOfTokens * tokenPrice);
-    require(supplyChainToken.balanceOf(address(this)) >= _numberOfTokens);
-    require(supplyChainToken.transfer(msg.sender, _numberOfTokens));
+    require(msg.value == _numberOfTokens * tokenPrice, 'Insufficient funds');
+    require(supplyChainToken.balanceOf(address(this)) >= _numberOfTokens, 'Out of liquility');
+
+    supplyChainToken.transfer(msg.sender, _numberOfTokens);
 
     emit TokenPurchase(msg.sender, _numberOfTokens);
   }
@@ -184,8 +190,10 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
     items[_upc].originFarmLongitude = _originFarmLongitude;
     items[_upc].productNotes = _productNotes;
     items[_upc].itemState = State.Harvested;
+    
     //itemsHistory?
-    //check if a farmer?
+    //History history = History(msg.sender, block.number);
+    itemsHistory[_upc][0] = History(msg.sender, block.number);
 
     // Increment sku
     sku = sku + 1;
@@ -208,12 +216,11 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
     emit Processed(_upc);
 
     //itemsHistory?
-    //check if a farmer?
+    itemsHistory[_upc][1] = History(msg.sender, block.number);
   }
 
   // Define a function 'packItem' that allows a farmer to mark an item 'Packed'
   function packItem(uint _upc) public
-
   // Call modifier to check if upc has passed previous supply chain stage
     processed(_upc)
   // Call modifier to verify caller of this function
@@ -227,7 +234,7 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
     emit Packed(_upc);
 
     //itemsHistory?
-    //check if a farmer?
+    itemsHistory[_upc][2] = History(msg.sender, block.number);
   }
   // Define a function 'sellItem' that allows a farmer to mark an item 'ForSale'
   //a.k.a. "addItem()"
@@ -244,8 +251,8 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
     // Emit the appropriate event
     emit ForSale(_upc);
 
-    //itemsHistory?
-    //check if a _____?
+    //itemsHistory
+    itemsHistory[_upc][3] = History(msg.sender, block.number);
   }
 
   // Define a function 'buyItem' that allows the disributor to mark an item 'Sold'
@@ -255,9 +262,9 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
       // Call modifier to check if upc has passed previous supply chain stage
       forSale(_upc)
       // Call modifer to check if buyer has paid enough
-      paidEnough(items[_upc].productPrice)
+      //paidEnough(items[_upc].productPrice)
       // Call modifer to send any excess ether back to buyer
-      checkValue(_upc)
+      //checkValue(_upc)
       onlyDistributor()
     {
 
@@ -267,12 +274,12 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
     items[_upc].distributorID = payable(msg.sender);
     // Transfer money to farmer
     address payable farmerID = items[_upc].originFarmerID;
-    farmerID.transfer(items[_upc].productPrice);
+    supplyChainToken.transfer(farmerID, items[_upc].productPrice);
     // emit the appropriate event
     emit Sold(_upc);
 
-    //itemsHistory?
-    //check if a _____?
+    //itemsHistory
+    itemsHistory[_upc][4] = History(msg.sender, block.number);
   }
 
   // Define a function 'shipItem' that allows the distributor to mark an item 'Shipped'
@@ -290,8 +297,8 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
     // emit the appropriate event
     emit Shipped(_upc);
 
-    //itemsHistory?
-    //check if a _____?
+    //itemsHistory
+    itemsHistory[_upc][5] = History(msg.sender, block.number);
   }
 
 
@@ -310,8 +317,14 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
     items[_upc].ownerID = msg.sender;
     items[_upc].retailerID = msg.sender;
 
+    // Pay to distributor
+    address payable distributorID = items[_upc].distributorID;
+    supplyChainToken.transfer(distributorID, items[_upc].productPrice);
+
     // Emit the appropriate event
     emit Received(_upc);
+
+    itemsHistory[_upc][6] = History(msg.sender, block.number);
   }
 
 
@@ -330,83 +343,72 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
     items[_upc].itemState = State.Purchased;
     items[_upc].ownerID = msg.sender;
     items[_upc].consumerID = payable(msg.sender);
+
+    // Pay to retailerID
+    address retailerID = items[_upc].retailerID;
+    supplyChainToken.transfer(retailerID, items[_upc].productPrice);
+
     // Emit the appropriate event
     emit Purchased(_upc);
 
+    itemsHistory[_upc][7] = History(msg.sender, block.number);
+  }
+
+  function fetchItemHistory(uint _upc, uint index) public view 
+  returns(address owner, uint blockNumber)
+  {
+    require(index < 8, 'index out of bound');
+    owner = itemsHistory[_upc][index].owner;
+    blockNumber = itemsHistory[_upc][index].timestamp;
   }
 
   // Define a function 'fetchItemBufferOne' that fetches the data
   function fetchItemBufferOne(uint _upc) public view returns
   (
-  uint    itemSKU,
-  uint    itemUPC,
-  address ownerID,
-  address originFarmerID,
-  string  memory originFarmName,
-  string  memory originFarmInformation,
-  string  memory originFarmLatitude,
-  string  memory originFarmLongitude
+    uint    itemSKU,
+    uint    itemUPC,
+    address ownerID,
+    address originFarmerID,
+    string  memory originFarmName,
+    string  memory originFarmInformation,
+    string  memory originFarmLatitude,
+    string  memory originFarmLongitude
   )
   {
-  // Assign values to the 8 parameters
-  itemSKU = items[_upc].sku;
-  itemUPC = items[_upc].upc; //or just _upc;
-  ownerID = items[_upc].ownerID;
-  originFarmerID = items[_upc].originFarmerID;
-  originFarmName = items[_upc].originFarmName;
-  originFarmInformation = items[_upc].originFarmInformation;
-  originFarmLatitude = items[_upc].originFarmLatitude;
-  originFarmLongitude = items[_upc].originFarmLongitude;
-
-  return
-  (
-  itemSKU,
-  itemUPC,
-  ownerID,
-  originFarmerID,
-  originFarmName,
-  originFarmInformation,
-  originFarmLatitude,
-  originFarmLongitude
-  );
+    // Assign values to the 8 parameters
+    itemSKU = items[_upc].sku;
+    itemUPC = items[_upc].upc; //or just _upc;
+    ownerID = items[_upc].ownerID;
+    originFarmerID = items[_upc].originFarmerID;
+    originFarmName = items[_upc].originFarmName;
+    originFarmInformation = items[_upc].originFarmInformation;
+    originFarmLatitude = items[_upc].originFarmLatitude;
+    originFarmLongitude = items[_upc].originFarmLongitude;
   }
 
   // Define a function 'fetchItemBufferTwo' that fetches the data
   function fetchItemBufferTwo(uint _upc) public view returns
   (
-  uint    itemSKU,
-  uint    itemUPC,
-  uint    productID,
-  string  memory productNotes,
-  uint    productPrice,
-  State    itemState,
-  address distributorID,
-  address retailerID,
-  address consumerID
+    uint    itemSKU,
+    uint    itemUPC,
+    uint    productID,
+    string  memory productNotes,
+    uint    productPrice,
+    State    itemState,
+    address distributorID,
+    address retailerID,
+    address consumerID
   )
   {
     // Assign values to the 9 parameters
-  itemSKU = items[_upc].sku;
-  itemUPC = items[_upc].upc; //or just _upc;
-  productID = items[_upc].productID;
-  productNotes = items[_upc].productNotes;
-  productPrice = items[_upc].productPrice;
-  itemState = items[_upc].itemState;
-  distributorID = items[_upc].distributorID;
-  retailerID = items[_upc].retailerID;
-  consumerID = items[_upc].consumerID;
-
-  return
-  (
-  itemSKU,
-  itemUPC,
-  productID,
-  productNotes,
-  productPrice,
-  itemState,
-  distributorID,
-  retailerID,
-  consumerID
-  );
+    itemSKU = items[_upc].sku;
+    itemUPC = items[_upc].upc; //or just _upc;
+    productID = items[_upc].productID;
+    productNotes = items[_upc].productNotes;
+    productPrice = items[_upc].productPrice;
+    itemState = items[_upc].itemState;
+    distributorID = items[_upc].distributorID;
+    retailerID = items[_upc].retailerID;
+    consumerID = items[_upc].consumerID;
   }
 }
