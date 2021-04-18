@@ -6,7 +6,7 @@ Course project for EECE571G Blockchain Software Engigneering
 
 ### Backend
 
-#### Deploy
+This script describes how to deploy and test the backend smart contract. 
 
 ```
 //clone the project
@@ -31,7 +31,33 @@ truffle migrate
 truffle test
 ```
 
-#### Test Output
+### Frontend 
+
+TBD
+
+### File Structure
+
+```
+.
+├── bs-config.json
+├── build               //not included in this repo, will automatically generate after `truffle compile`
+├── node_modules        //not included in this repo, will automatically  generate after `npm install`
+├── contracts           //source codes of smart contracts (*.sol)
+├── migrations          //deployment scripts of smart contracts (*.js)
+├── test                //unit test files of smart contracts (*.test.js)
+├── package.json        //dependency
+├── package-lock.json   //dependency
+├── README.md           //<== u are here!
+├── src                 //frontend things
+├── index.html
+├── style.css
+├── LICENSE
+└── truffle-config.js   //truffle config file, includes testnet address/key and solc compiler version.
+```
+
+## Appendix
+
+### Truffle Test Output
 
 ```
 sirius@UbuntuVM:~/Desktop/supplychain-on-blockchain$ truffle test
