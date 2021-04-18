@@ -161,9 +161,9 @@ contract('SupplyChain', function(accounts) {
         });
 
         it("Testing BalanceOf() that query balance", async()=>{
-            //const supplyChain = await SupplyChain.deployed();
+            const supplyChain = await SupplyChain.deployed();
             const supplyChainToken = await SupplyChainToken.deployed();
-            let balanceBefore = await supplyChainToken.balanceOf(distributorID);
+            let balanceBefore = await supplyChainToken.allowance(supplyChain.address, distributorID);
             assert.equal(balanceBefore, 0, 'Error: SCT is not 0.')
 
         });
@@ -171,9 +171,9 @@ contract('SupplyChain', function(accounts) {
         it("Testing buyToken() that top-up balance", async()=>{
             const supplyChain = await SupplyChain.deployed();
             const supplyChainToken = await SupplyChainToken.deployed();
-            let balanceBefore = await supplyChainToken.balanceOf(distributorID);
+            let balanceBefore = await supplyChainToken.allowance(supplyChain.address, distributorID);
             let buytoken = await supplyChain.buyTokens(100, {from: distributorID, value: 100});
-            let balanceAfter = await supplyChainToken.balanceOf(distributorID);
+            let balanceAfter = await supplyChainToken.allowance(supplyChain.address, distributorID);
 
             truffleAssert.eventEmitted(buytoken, 'TokenPurchase');
             assert.equal(balanceBefore, 0, 'Error: Intial SCT is not 0.');
@@ -289,16 +289,16 @@ contract('SupplyChain', function(accounts) {
 
             let randomvar = await supplyChain.addDistributor(distributorID);
 
-            //let buytoken = await supplyChain.buyTokens(100, {from: distributorID, value: 100})
-            //let buyAfter = await supplyChainToken.balanceOf(distributorID)
+            let buytoken = await supplyChain.buyTokens(100, {from: distributorID, value: 100})
+            //let buyAfter = await supplyChainToken.allowance(supplyChain.address, distributorID);
 
             //assert.equal(buyAfter, 200, 'balance != 200')
 
             // Insufficient fund, invalid
-            //await truffleAssert.fails(
-            //    supplyChain.buyItem(upc, {from: distributorID}), //SCT[distributorID] = 100,
-            //    truffleAssert.ErrorType.REVERT
-            //);
+            await truffleAssert.fails(
+                supplyChain.buyItem(upc, {from: distributorID}), //SCT[distributorID] = 100,
+                truffleAssert.ErrorType.REVERT
+            );
 
             buytoken = await supplyChain.buyTokens(1000, {from: distributorID, value: 1000})
 

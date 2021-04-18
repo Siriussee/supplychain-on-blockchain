@@ -81,8 +81,9 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
   event Received(uint upc);
   event Purchased(uint upc);
 
-  //Define event for token purchased
+  //Define event for token purchased and sold
   event TokenPurchase(address indexed buyer, uint256 value);
+  event TokenSell(address indexed buyer, uint256 value);
 
   // Define a modifer that verifies the Caller
   modifier verifyCaller (address _address) {
@@ -102,6 +103,16 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
     uint _price = items[_upc].productPrice;
     uint amountToReturn = msg.value - _price;
     supplyChainToken.transfer(items[_upc].consumerID, amountToReturn);
+  }
+
+  modifier hasEnoughToken(uint _amount) {
+    require(supplyChainToken.balanceOf(msg.sender) >= _amount, "insufficient funds");
+    _;
+  }
+
+  modifier hasEnoughAllowance(address spender, uint _amount) {
+    require(supplyChainToken.allowance(address(this), msg.sender) >= _amount, "insufficient allowance");
+    _;
   }
 
   // Define a modifier that checks if an item.state of a upc is Harvested
@@ -172,12 +183,32 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
    * Emits an {TokenPurchase} event.
    */
   function buyTokens(uint256 _numberOfTokens) public payable {
-    require(msg.value == _numberOfTokens * tokenPrice, 'Insufficient funds');
+    require(msg.value >= _numberOfTokens * tokenPrice, 'Insufficient funds');
     require(supplyChainToken.balanceOf(address(this)) >= _numberOfTokens, 'Out of liquility');
 
-    supplyChainToken.transfer(msg.sender, _numberOfTokens);
+    // increase tokens
+    supplyChainToken.increaseAllowance(msg.sender, _numberOfTokens);
 
     emit TokenPurchase(msg.sender, _numberOfTokens);
+  }
+
+  /**
+   * @dev Users can sell tokens to this smart contract (the supplyChain contract)
+   * @param _numberOfTokens: the amount that decrease to msg.sender
+   * Emits an {TokenSell} event.
+   */
+  function sellTokens(uint256 _numberOfTokens) public 
+    hasEnoughToken(_numberOfTokens)
+  {
+    require(address(this).balance >= _numberOfTokens * tokenPrice, 'Out of liquility');
+
+    //decrease tokens
+    supplyChainToken.decreaseAllowance(msg.sender, _numberOfTokens);
+
+    //refund ether
+    payable(msg.sender).transfer(_numberOfTokens * tokenPrice);
+
+    emit TokenSell(msg.sender, _numberOfTokens);
   }
 
   /**
@@ -189,7 +220,7 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
    * @param _originFarmInformation: string
    * @param _originFarmLatitude: string
    * @param _originFarmLongitude: string
-   * @param_productNotes: string
+   * @param _productNotes: string
    * Emits an {Harvested} event.
    */
   function harvestItem(uint _upc, address payable _originFarmerID, string memory _originFarmName, 
@@ -283,6 +314,11 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
     //itemsHistory
     itemsHistory[_upc][3] = History(msg.sender, block.number);
   }
+
+  function transferAllowance(address from, address to, uint amount) internal {
+    supplyChainToken.decreaseAllowance(from, amount);
+    supplyChainToken.increaseAllowance(to, amount);
+  }
   
   /**
    * @dev Allows the disributor to mark an item 'Sold'
@@ -294,18 +330,17 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
    */
   function buyItem(uint _upc) public payable
       forSale(_upc)
-      //paidEnough(items[_upc].productPrice)
-      //checkValue(_upc)
+      hasEnoughAllowance(msg.sender, items[_upc].productPrice)
       onlyDistributor()
     {
-
     // Update the appropriate fields - ownerID, distributorID, itemState
     items[_upc].itemState = State.Sold;
     items[_upc].ownerID = payable(msg.sender);
     items[_upc].distributorID = payable(msg.sender);
+
     // Transfer money to farmer
-    address payable farmerID = items[_upc].originFarmerID;
-    supplyChainToken.transfer(farmerID, items[_upc].productPrice);
+    transferAllowance(msg.sender, items[_upc].originFarmerID, items[_upc].productPrice);
+
     // emit the appropriate event
     emit Sold(_upc);
 
@@ -343,6 +378,7 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
    */
   function receiveItem(uint _upc) public
     shipped(_upc)
+    hasEnoughAllowance(msg.sender, items[_upc].productPrice)
     verifyCaller(msg.sender)
     onlyRetailer()
     // Access Control List enforced by calling Smart Contract / DApp
@@ -354,8 +390,7 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
     items[_upc].retailerID = msg.sender;
 
     // Pay to distributor
-    address payable distributorID = items[_upc].distributorID;
-    supplyChainToken.transfer(distributorID, items[_upc].productPrice);
+    transferAllowance(msg.sender, items[_upc].distributorID, items[_upc].productPrice);
 
     // Emit the appropriate event
     emit Received(_upc);
@@ -372,6 +407,7 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
   function purchaseItem(uint _upc) public
     received(_upc)
     verifyCaller(msg.sender)
+    hasEnoughAllowance(msg.sender, items[_upc].productPrice)
     onlyConsumer()
     //no check to see if they paid?
     // Access Control List enforced by calling Smart Contract / DApp
@@ -383,8 +419,7 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
     items[_upc].consumerID = payable(msg.sender);
 
     // Pay to retailerID
-    address retailerID = items[_upc].retailerID;
-    supplyChainToken.transfer(retailerID, items[_upc].productPrice);
+    transferAllowance(msg.sender, items[_upc].retailerID, items[_upc].productPrice);
 
     // Emit the appropriate event
     emit Purchased(_upc);
