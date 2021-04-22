@@ -7,6 +7,7 @@ import "../coffeeaccesscontrol/ConsumerRole.sol";
 import "../coffeeaccesscontrol/RetailerRole.sol";
 import "../coffeeaccesscontrol/DistributorRole.sol";
 import "../coffeecore/SupplyChainToken.sol";
+import "../coffeecore/InvoiceToken.sol";
 import "../../node_modules/@openzeppelin/contracts/access/Ownable.sol";
 
 
@@ -14,6 +15,12 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
 
   // Define a variable called 'supplyChainToken' for self-defined ERC20 token
   SupplyChainToken supplyChainToken;
+
+  // Define a variable called 'invoiceToken' for self-defined ERC721 token
+  InvoiceToken invoiceToken;
+
+  // Define a variable called 'invoiceId' for identifying invoices
+  uint invoiceId;
   
   // The value of supplyChainToken, tokenPrice = 1 means that 1 wei = 1 SCT
   uint256 tokenPrice;
@@ -169,10 +176,14 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
    * @param _supplyChainTokenContract: the address of underlying supplyChainTokenContract
    * @param _tokenPrice: the price of supplyChainToken
    */
-  constructor(SupplyChainToken _supplyChainTokenContract, uint256 _tokenPrice) payable {
+  constructor(SupplyChainToken _supplyChainTokenContract, 
+              uint256 _tokenPrice,
+              InvoiceToken _invoiceToken) payable {
     transferOwnership(msg.sender);
     supplyChainToken = _supplyChainTokenContract;
     tokenPrice = _tokenPrice;
+    invoiceToken = _invoiceToken;
+    invoiceId=1;
     sku = 1;
     upc = 1;
   }
@@ -327,12 +338,16 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
    * also marks farmer address and block number into itemHistory. Only a Distributor can call it.
    * @param _upc: uint
    * Emits an {Sold} event.
+   * NFT invoice minted for the buyer
    */
-  function buyItem(uint _upc) public payable
+  function buyItem(uint _upc, uint _invoiceId) public payable
       forSale(_upc)
       hasEnoughAllowance(msg.sender, items[_upc].productPrice)
       onlyDistributor()
     {
+    // mint the invoice for the buyer which emits Transfer event
+    // invoiceToken.mint(msg.sender, _invoiceId);
+
     // Update the appropriate fields - ownerID, distributorID, itemState
     items[_upc].itemState = State.Sold;
     items[_upc].ownerID = payable(msg.sender);
