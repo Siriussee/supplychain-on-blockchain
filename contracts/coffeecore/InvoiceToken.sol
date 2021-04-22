@@ -15,7 +15,4 @@ contract InvoiceToken is ERC721, Ownable{
 function mint(address to, uint256 tokenId) public onlyOwner {
    _mint(to, tokenId);
   }
-// function _mint(address to) public onlyOwner{
-//    mint(to, totalSupply().add(1));
-//   }
 }
