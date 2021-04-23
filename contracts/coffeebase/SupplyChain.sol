@@ -346,7 +346,7 @@ contract SupplyChain is Ownable, ConsumerRole, RetailerRole, DistributorRole, Fa
       onlyDistributor()
     {
     // mint the invoice for the buyer which emits Transfer event
-    // invoiceToken.mint(msg.sender, _invoiceId);
+    invoiceToken.mint(msg.sender, _invoiceId);
 
     // Update the appropriate fields - ownerID, distributorID, itemState
     items[_upc].itemState = State.Sold;
