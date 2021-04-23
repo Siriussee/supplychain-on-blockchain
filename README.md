@@ -35,9 +35,9 @@ truffle test
 ```
 
 ### Frontend 
-
-TBD
-
+```
+npm run dev
+```
 ### File Structure
 
 ```
