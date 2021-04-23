@@ -2,6 +2,9 @@
 
 Course project for EECE571G Blockchain Software Engigneering
 
+This project is a coffee supply chain with ERC20 and ERC721 token support. In our supply chain, roles in coffee bean manufacturer and distribution are integrated into one smart contract, the SupplyChain contract. Further, we ensemble a standard ERC20 token support to our supply chain, in which all participants can settle accounts using SupplyChainToken (SCT), and exchange between SCT and ETH without any barrier. The final addition is ERC721 for invoicing. Please go to the following GitHub repository to download our project and run a demo on your own machine.
+GitHub Repo: https://github.com/Siriussee/supplychain-on-blockchain
+
 ## How to Use
 
 ### Backend
